@@ -1,0 +1,1 @@
+lib de autenticação da HYPE TI
