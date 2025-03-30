@@ -8,7 +8,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepare": "husky install"
+    "prepare": "husky",
+    "test": " echo 'tests is void'"
   },
   "keywords": [
     "nestjs",
