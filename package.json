@@ -13,6 +13,8 @@
     "prettier:check": "prettier --check \"./{src,tests}/*.{ts,js,json,*rc}\"",
     "lint:fix": "eslint -fix \"./{src,tests}/*.{ts,js,json,*rc}\" && npm run prettier:check",
     "lint:check": "eslint \"./{src,tests}/*.{ts,js,json,*rc}\" && npm run prettier:check",
+    "prepush": "lint-staged && npm run lint:check",
+    "precommit": "npm run build",
     "test": " echo 'tests is void'"
   },
   "keywords": [
