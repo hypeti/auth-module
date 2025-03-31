@@ -7,8 +7,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "prepare": "husky",
+    "build": "rm -rf ./dist && tsc",
+    "prepare": "npx husky",
+    "prettier:fix": "prettier --write \"./{src,tests}/*.{ts,js,json,*rc}\"",
+    "prettier:check": "prettier --check \"./{src,tests}/*.{ts,js,json,*rc}\"",
+    "lint:fix": "eslint -fix \"./{src,tests}/*.{ts,js,json,*rc}\" && npm run prettier:check",
+    "lint:check": "eslint \"./{src,tests}/*.{ts,js,json,*rc}\" && npm run prettier:check",
     "test": " echo 'tests is void'"
   },
   "keywords": [
@@ -25,7 +29,13 @@
   "devDependencies": {
     "@types/express": "^5.0.1",
     "@types/node": "^20.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
     "hysky": "^1.0.1",
+    "lint-staged": "^15.5.0",
+    "prettier": "^3.0.0",
     "typescript": "^5.1.3"
   },
   "dependencies": {

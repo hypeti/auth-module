@@ -1,1 +1,5 @@
+#!/usr/bin/env sh
+
+pnpm prettier:check
+
 pnpm build
