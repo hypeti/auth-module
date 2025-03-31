@@ -12,7 +12,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { PERMISSIONS_KEY } from '../decorators/permissions/permissions.decorator';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { IJWTPayload, JWTPermissions } from '../types/jwt-payload.type';
+import { IJWTPayload } from '../types/jwt-payload.type';
 import { CheckPermissionsHelper } from '../helpers/check-permissions.helper';
 import { IApiKeyRepository } from '../interfaces/api-key.repository';
 import { RequestCustom } from '../types/hype-request';
@@ -85,18 +85,22 @@ export class AuthorizerJWT implements CanActivate {
       );
     }
 
-    const hasPermission = this.checkPermissionHelper.validate(
-      resource,
-      method,
-      payload.permissions,
-    );
 
-    if (!hasPermission) {
-      throw new ForbiddenException(
-        `You do not have permission to access this resource '${String(method).toLocaleUpperCase()} /${resource}'`,
+    const validateRoutes = this.configService.get<boolean>("AUTH_VALIDATE_ROUTES");
+
+    if (validateRoutes === true) {
+      const hasPermission = this.checkPermissionHelper.validate(
+        resource,
+        method,
+        payload.permissions,
       );
-    }
 
+      if (!hasPermission) {
+        throw new ForbiddenException(
+          `You do not have permission to access this resource '${String(method).toLocaleUpperCase()} /${resource}'`,
+        );
+      }
+    }
     return true;
   }
 
