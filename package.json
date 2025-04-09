@@ -1,5 +1,5 @@
 {
-  "name": "hype-module-auth",
+  "name": "@hypeti/auth-module",
   "version": "1.0.0",
   "description": "Modulo de autenticação HYPE TI",
   "author": "Diogo Franco",
