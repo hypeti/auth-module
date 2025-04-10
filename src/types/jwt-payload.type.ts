@@ -1,4 +1,5 @@
-import { ResourceTypeEnum } from "../enums/resource.enum";
+import { ResourceTypeEnum } from '../enums/resource.enum';
+import { SessionTypeEnum } from '../enums/session-type.enum';
 
 interface IJWTClient {
   id: string;
@@ -8,6 +9,7 @@ interface IJWTClient {
 interface IJWTUser {
   id: string;
   name: string;
+  accountId: string;
   createdAt: Date;
 }
 
@@ -26,4 +28,5 @@ export interface IJWTPayload {
   sub: string;
   environment: string;
   iis: string;
+  type: SessionTypeEnum;
 }

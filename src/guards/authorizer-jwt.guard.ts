@@ -16,7 +16,7 @@ import { IJWTPayload } from '../types/jwt-payload.type';
 import { CheckPermissionsHelper } from '../helpers/check-permissions.helper';
 import { IApiKeyRepository } from '../interfaces/api-key.repository';
 import { RequestCustom } from '../types/hype-request';
-
+import { SessionTypeEnum } from '../enums/session-type.enum';
 
 @Injectable()
 export class AuthorizerJWT implements CanActivate {
@@ -25,7 +25,8 @@ export class AuthorizerJWT implements CanActivate {
     private jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly logger: Logger,
-    @Inject("ApiKeyRepository") private readonly apiKeysRepository: IApiKeyRepository,
+    @Inject('ApiKeyRepository')
+    private readonly apiKeysRepository: IApiKeyRepository,
     private readonly checkPermissionHelper: CheckPermissionsHelper,
   ) {}
 
@@ -74,6 +75,10 @@ export class AuthorizerJWT implements CanActivate {
       request.identifier = payload.identifier;
       request.clientId = payload.application.id;
 
+      if (payload.type === SessionTypeEnum.Password) {
+        request.userId = payload.user?.id;
+        request.accountId = payload.user?.accountId;
+      }
     } catch (error: any) {
       this.logger.error(error);
       if (error.message === 'jwt expired') {
@@ -85,8 +90,9 @@ export class AuthorizerJWT implements CanActivate {
       );
     }
 
-
-    const validateRoutes = this.configService.get<boolean>("AUTH_VALIDATE_ROUTES");
+    const validateRoutes = this.configService.get<boolean>(
+      'AUTH_VALIDATE_ROUTES',
+    );
 
     if (validateRoutes === true) {
       const hasPermission = this.checkPermissionHelper.validate(
@@ -103,6 +109,4 @@ export class AuthorizerJWT implements CanActivate {
     }
     return true;
   }
-
-
 }
