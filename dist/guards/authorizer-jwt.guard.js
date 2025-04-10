@@ -20,6 +20,7 @@ const jwt_1 = require("@nestjs/jwt");
 const permissions_decorator_1 = require("../decorators/permissions/permissions.decorator");
 const public_decorator_1 = require("../decorators/public.decorator");
 const check_permissions_helper_1 = require("../helpers/check-permissions.helper");
+const session_type_enum_1 = require("../enums/session-type.enum");
 let AuthorizerJWT = class AuthorizerJWT {
     constructor(reflector, jwtService, configService, logger, apiKeysRepository, checkPermissionHelper) {
         this.reflector = reflector;
@@ -61,6 +62,10 @@ let AuthorizerJWT = class AuthorizerJWT {
             });
             request.identifier = payload.identifier;
             request.clientId = payload.application.id;
+            if (payload.type === session_type_enum_1.SessionTypeEnum.Password) {
+                request.userId = payload.user?.id;
+                request.accountId = payload.user?.accountId;
+            }
         }
         catch (error) {
             this.logger.error(error);
@@ -69,7 +74,7 @@ let AuthorizerJWT = class AuthorizerJWT {
             }
             throw new common_1.ForbiddenException('You do not have permission to access this resource');
         }
-        const validateRoutes = this.configService.get("AUTH_VALIDATE_ROUTES");
+        const validateRoutes = this.configService.get('AUTH_VALIDATE_ROUTES');
         if (validateRoutes === true) {
             const hasPermission = this.checkPermissionHelper.validate(resource, method, payload.permissions);
             if (!hasPermission) {
@@ -82,7 +87,7 @@ let AuthorizerJWT = class AuthorizerJWT {
 exports.AuthorizerJWT = AuthorizerJWT;
 exports.AuthorizerJWT = AuthorizerJWT = __decorate([
     (0, common_1.Injectable)(),
-    __param(4, (0, common_1.Inject)("ApiKeyRepository")),
+    __param(4, (0, common_1.Inject)('ApiKeyRepository')),
     __metadata("design:paramtypes", [core_1.Reflector,
         jwt_1.JwtService,
         config_1.ConfigService,
