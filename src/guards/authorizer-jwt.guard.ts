@@ -90,11 +90,11 @@ export class AuthorizerJWT implements CanActivate {
       );
     }
 
-    const validateRoutes = this.configService.get<boolean>(
+    const validateRoutes = this.configService.get<boolean | string>(
       'AUTH_VALIDATE_ROUTES',
     );
 
-    if (validateRoutes === true) {
+    if (validateRoutes === true || validateRoutes === 'true') {
       const hasPermission = this.checkPermissionHelper.validate(
         resource,
         method,
