@@ -75,7 +75,7 @@ let AuthorizerJWT = class AuthorizerJWT {
             throw new common_1.ForbiddenException('You do not have permission to access this resource');
         }
         const validateRoutes = this.configService.get('AUTH_VALIDATE_ROUTES');
-        if (validateRoutes === true) {
+        if (validateRoutes === true || validateRoutes === 'true') {
             const hasPermission = this.checkPermissionHelper.validate(resource, method, payload.permissions);
             if (!hasPermission) {
                 throw new common_1.ForbiddenException(`You do not have permission to access this resource '${String(method).toLocaleUpperCase()} /${resource}'`);
