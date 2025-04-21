@@ -4,4 +4,5 @@ export interface RequestCustom extends Request {
     identifier: string;
     userId?: string;
     accountId?: string;
+    profile?: string[];
 }

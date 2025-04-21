@@ -4,7 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { CheckPermissionsHelper } from '../helpers/check-permissions.helper';
 import { IApiKeyRepository } from '../interfaces/api-key.repository';
-export declare class AuthorizerJWT implements CanActivate {
+export declare class JwtAuthGuard implements CanActivate {
     private readonly reflector;
     private jwtService;
     private readonly configService;

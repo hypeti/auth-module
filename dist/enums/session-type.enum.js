@@ -5,4 +5,5 @@ var SessionTypeEnum;
 (function (SessionTypeEnum) {
     SessionTypeEnum["ClientCredentials"] = "client_credentials";
     SessionTypeEnum["Password"] = "password";
+    SessionTypeEnum["RefreshToken"] = "refresh_token";
 })(SessionTypeEnum || (exports.SessionTypeEnum = SessionTypeEnum = {}));

@@ -17,9 +17,11 @@ import { CheckPermissionsHelper } from '../helpers/check-permissions.helper';
 import { IApiKeyRepository } from '../interfaces/api-key.repository';
 import { RequestCustom } from '../types/hype-request';
 import { SessionTypeEnum } from '../enums/session-type.enum';
+import { ApiKeyStatusEnum } from '../enums/api-key-status.enum';
+import { AuthErrorMessage } from '../enums/auth-error-message.enum';
 
 @Injectable()
-export class AuthorizerJWT implements CanActivate {
+export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private jwtService: JwtService,
@@ -55,7 +57,7 @@ export class AuthorizerJWT implements CanActivate {
     const authHeader = request.headers.authorization;
 
     if (!authHeader) {
-      throw new UnauthorizedException('Unauthorized');
+      throw new ForbiddenException(AuthErrorMessage.UNAUTHORIZED);
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -64,8 +66,16 @@ export class AuthorizerJWT implements CanActivate {
     const stage = this.configService.get<string>('STAGE');
     const jwtDecode = this.jwtService.decode(token);
 
+    if (jwtDecode.type === SessionTypeEnum.RefreshToken) {
+      throw new ForbiddenException(AuthErrorMessage.INVALID_TOKEN);
+    }
+
     const apikey = await this.apiKeysRepository.findById(jwtDecode.keyId);
-    const { jwtSecretKey } = apikey;
+    const { jwtSecretKey, status } = apikey;
+
+    if (status === ApiKeyStatusEnum.DISABLED) {
+      throw new ForbiddenException('Invalid token');
+    }
 
     try {
       payload = await this.jwtService.verifyAsync(token, {
@@ -78,16 +88,15 @@ export class AuthorizerJWT implements CanActivate {
       if (payload.type === SessionTypeEnum.Password) {
         request.userId = payload.user?.id;
         request.accountId = payload.user?.accountId;
+        request.profile = payload.profile;
       }
     } catch (error: any) {
       this.logger.error(error);
       if (error.message === 'jwt expired') {
-        throw new ForbiddenException('the incoming token has expired');
+        throw new UnauthorizedException(AuthErrorMessage.EXPIRED);
       }
 
-      throw new ForbiddenException(
-        'You do not have permission to access this resource',
-      );
+      throw new ForbiddenException(AuthErrorMessage.UNAUTHORIZED);
     }
 
     const validateRoutes = this.configService.get<boolean | string>(
@@ -103,7 +112,7 @@ export class AuthorizerJWT implements CanActivate {
 
       if (!hasPermission) {
         throw new ForbiddenException(
-          `You do not have permission to access this resource '${String(method).toLocaleUpperCase()} /${resource}'`,
+          `${AuthErrorMessage.UNAUTHORIZED}: '${String(method).toLocaleUpperCase()} /${resource}'`,
         );
       }
     }

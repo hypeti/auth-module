@@ -1,8 +1,8 @@
 import { DynamicModule } from '@nestjs/common';
 import { Provider } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { AuthorizerJWT } from './guards/authorizer-jwt.guard';
 import { IApiKeyRepository } from './interfaces/api-key.repository';
+import { JwtAuthGuard } from './guards/authorizer-jwt.guard';
 
 @Module({})
 export class HypeAuthModule {
@@ -11,8 +11,8 @@ export class HypeAuthModule {
   ): DynamicModule {
     return {
       module: HypeAuthModule,
-      providers: [ApiKeyRepositoryProvider, AuthorizerJWT],
-      exports: [AuthorizerJWT],
+      providers: [ApiKeyRepositoryProvider, JwtAuthGuard],
+      exports: [JwtAuthGuard],
     };
   }
 }

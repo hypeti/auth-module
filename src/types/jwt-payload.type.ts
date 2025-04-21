@@ -25,6 +25,7 @@ export interface IJWTPayload {
   user?: IJWTUser;
   permissions: JWTPermissions[];
   keyId: string;
+  profile?: string[];
   jti: string;
   sub: string;
   environment: string;

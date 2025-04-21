@@ -1,4 +1,5 @@
 export declare enum SessionTypeEnum {
     ClientCredentials = "client_credentials",
-    Password = "password"
+    Password = "password",
+    RefreshToken = "refresh_token"
 }

@@ -12,7 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuthorizerJWT = void 0;
+exports.JwtAuthGuard = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const core_1 = require("@nestjs/core");
@@ -21,7 +21,9 @@ const permissions_decorator_1 = require("../decorators/permissions/permissions.d
 const public_decorator_1 = require("../decorators/public.decorator");
 const check_permissions_helper_1 = require("../helpers/check-permissions.helper");
 const session_type_enum_1 = require("../enums/session-type.enum");
-let AuthorizerJWT = class AuthorizerJWT {
+const api_key_status_enum_1 = require("../enums/api-key-status.enum");
+const auth_error_message_enum_1 = require("../enums/auth-error-message.enum");
+let JwtAuthGuard = class JwtAuthGuard {
     constructor(reflector, jwtService, configService, logger, apiKeysRepository, checkPermissionHelper) {
         this.reflector = reflector;
         this.jwtService = jwtService;
@@ -48,14 +50,20 @@ let AuthorizerJWT = class AuthorizerJWT {
         const request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
         if (!authHeader) {
-            throw new common_1.UnauthorizedException('Unauthorized');
+            throw new common_1.ForbiddenException(auth_error_message_enum_1.AuthErrorMessage.UNAUTHORIZED);
         }
         const token = authHeader.replace('Bearer ', '');
         let payload;
         const stage = this.configService.get('STAGE');
         const jwtDecode = this.jwtService.decode(token);
+        if (jwtDecode.type === session_type_enum_1.SessionTypeEnum.RefreshToken) {
+            throw new common_1.ForbiddenException(auth_error_message_enum_1.AuthErrorMessage.INVALID_TOKEN);
+        }
         const apikey = await this.apiKeysRepository.findById(jwtDecode.keyId);
-        const { jwtSecretKey } = apikey;
+        const { jwtSecretKey, status } = apikey;
+        if (status === api_key_status_enum_1.ApiKeyStatusEnum.DISABLED) {
+            throw new common_1.ForbiddenException('Invalid token');
+        }
         try {
             payload = await this.jwtService.verifyAsync(token, {
                 secret: `${jwtSecretKey}-${stage}`,
@@ -65,31 +73,32 @@ let AuthorizerJWT = class AuthorizerJWT {
             if (payload.type === session_type_enum_1.SessionTypeEnum.Password) {
                 request.userId = payload.user?.id;
                 request.accountId = payload.user?.accountId;
+                request.profile = payload.profile;
             }
         }
         catch (error) {
             this.logger.error(error);
             if (error.message === 'jwt expired') {
-                throw new common_1.ForbiddenException('the incoming token has expired');
+                throw new common_1.UnauthorizedException(auth_error_message_enum_1.AuthErrorMessage.EXPIRED);
             }
-            throw new common_1.ForbiddenException('You do not have permission to access this resource');
+            throw new common_1.ForbiddenException(auth_error_message_enum_1.AuthErrorMessage.UNAUTHORIZED);
         }
         const validateRoutes = this.configService.get('AUTH_VALIDATE_ROUTES');
         if (validateRoutes === true || validateRoutes === 'true') {
             const hasPermission = this.checkPermissionHelper.validate(resource, method, payload.permissions);
             if (!hasPermission) {
-                throw new common_1.ForbiddenException(`You do not have permission to access this resource '${String(method).toLocaleUpperCase()} /${resource}'`);
+                throw new common_1.ForbiddenException(`${auth_error_message_enum_1.AuthErrorMessage.UNAUTHORIZED}: '${String(method).toLocaleUpperCase()} /${resource}'`);
             }
         }
         return true;
     }
 };
-exports.AuthorizerJWT = AuthorizerJWT;
-exports.AuthorizerJWT = AuthorizerJWT = __decorate([
+exports.JwtAuthGuard = JwtAuthGuard;
+exports.JwtAuthGuard = JwtAuthGuard = __decorate([
     (0, common_1.Injectable)(),
     __param(4, (0, common_1.Inject)('ApiKeyRepository')),
     __metadata("design:paramtypes", [core_1.Reflector,
         jwt_1.JwtService,
         config_1.ConfigService,
         common_1.Logger, Object, check_permissions_helper_1.CheckPermissionsHelper])
-], AuthorizerJWT);
+], JwtAuthGuard);
