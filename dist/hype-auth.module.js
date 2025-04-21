@@ -14,8 +14,8 @@ let HypeAuthModule = HypeAuthModule_1 = class HypeAuthModule {
     static register(ApiKeyRepositoryProvider) {
         return {
             module: HypeAuthModule_1,
-            providers: [ApiKeyRepositoryProvider, authorizer_jwt_guard_1.AuthorizerJWT],
-            exports: [authorizer_jwt_guard_1.AuthorizerJWT],
+            providers: [ApiKeyRepositoryProvider, authorizer_jwt_guard_1.JwtAuthGuard],
+            exports: [authorizer_jwt_guard_1.JwtAuthGuard],
         };
     }
 };
